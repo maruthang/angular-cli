@@ -70,6 +70,11 @@ export class MemoryLoadResultCache implements LoadResultCache {
   }
 
   invalidate(path: string): boolean {
+    // Normalize the path to match how watch file paths are stored in `put()`.
+    // Without normalization, paths produced by `fileURLToPath()` or `path.join()`
+    // during error reporting may use different separators than the normalized paths
+    // stored as keys in `#fileDependencies`, causing the lookup to fail and leaving
+    // stale error results in the cache after the source file is corrected.
     const normalizedPath = normalize(path);
     const affectedPaths = this.#fileDependencies.get(normalizedPath);
     let found = false;
